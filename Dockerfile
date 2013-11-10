@@ -10,11 +10,12 @@ FROM centos
 ## Get some karma ##
 MAINTAINER Martin Goyot (Erwyn/Gnouf), martin@piwany.com
 
-## Add the Tuleap Repository to the yum repositories ##
+## Install dependencies ##
+RUN yum install glibc.i686 openssh-server httpd passwd -y
+
+## Tweak configuration ##
+RUN echo "SELINUX=disabled" > /etc/selinux/config
+
+## Deploy Tuleap ##
 ADD Tuleap.repo /etc/yum.repos.d/
-
-## Install glibc ##
-RUN yum install glibc.i686 -y
-
-## Install Tuleap ##
-RUN yum install tuleap-all -y
+RUN service sshd restart && service httpd restart && yum install tuleap-all -y
