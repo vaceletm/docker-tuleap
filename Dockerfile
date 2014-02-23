@@ -18,6 +18,7 @@ ADD rpmforge.repo /etc/yum.repos.d/
 RUN yum install glibc.i686 openssh-server httpd passwd -y
 
 ## Tweak configuration ##
+RUN chkconfig iptables off
 RUN echo "SELINUX=disabled" > /etc/selinux/config
 
 ## Deploy Tuleap ##
