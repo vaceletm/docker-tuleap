@@ -20,7 +20,6 @@ Known issues
 ------------
 
 * SELinux stuff seems not behaving well (raises errors when trying to install stuff)
-* Crond doesn't work, hence all backend is not working properly (no git repository created, etc)
 * I'm not sure why but supervisord eats 100% of CPU when running by hand. Doesn't seems to be the case when it's run at boot time
 
 Todo
