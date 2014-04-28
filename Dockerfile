@@ -19,8 +19,6 @@ ADD rpmforge.repo /etc/yum.repos.d/
 
 RUN rpm -i http://mir01.syntis.net/epel/6/i386/epel-release-6-8.noarch.rpm
 
-#RUN yum install glibc.i686 openssh-server httpd passwd -y
-
 ## Tweak configuration ##
 RUN echo "SELINUX=disabled" > /etc/selinux/config
 
@@ -33,11 +31,14 @@ RUN yum install -y tuleap-plugin-tracker
 RUN yum install -y tuleap-theme-experimental
 RUN yum install -y tuleap-theme-tuleap	
 RUN yum install -y tuleap-core-subversion
-RUN yum install -y --enablerepo=rpmforge-extras tuleap-plugin-git
 
 # Fix centos defaults
 # Cron: http://stackoverflow.com/a/21928878/1528413
 RUN sed -i '/session    required   pam_loginuid.so/c\#session    required   pam_loginuid.so' /etc/pam.d/crond
+RUN sed -i '/session    required     pam_loginuid.so/c\#session    required     pam_loginuid.so' /etc/pam.d/sshd
+
+RUN /sbin/service sshd start && yum install -y --enablerepo=rpmforge-extras tuleap-plugin-git
+
 RUN echo "NETWORKING=yes" > /etc/sysconfig/network
 
 # Install Tuleap

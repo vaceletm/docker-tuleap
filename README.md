@@ -1,7 +1,7 @@
 Docker-Tuleap
 ==============
 
-This is a simple dockerfile in order to install quickly Tuleap on top of LXC.
+This is a simple dockerfile in order to install quickly Tuleap on top of docker.
 
 How to use it?
 ---------------
@@ -12,7 +12,7 @@ Just install docker on your system as explained on the [docker](http://docker.io
 
 You just got it!
 
-    $ sudo docker run -d -p 80:80 -p 443:443 docker-tuleap
+    $ sudo docker run -d -p 80:80 -p 443:443 -p 22:22 docker-tuleap
 
 Will run the container, just open http://localhost and enjoy !
 
@@ -25,5 +25,6 @@ Known issues
 Todo
 ----
 
+* Start rsyslog
 * Fix all known issues ;)
 * Split the stuff in several images
