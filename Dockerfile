@@ -35,6 +35,15 @@ RUN yum install -y tuleap-core-subversion
 # Fix centos defaults
 # Cron: http://stackoverflow.com/a/21928878/1528413
 RUN sed -i '/session    required   pam_loginuid.so/c\#session    required   pam_loginuid.so' /etc/pam.d/crond
+
+# Gitolite will not work out-of-the-box with an error like 
+# "User gitolite not allowed because account is locked"
+# Given http://stackoverflow.com/a/15761971/1528413 you might want to trick
+# /etc/shadown but the following pam modification seems to do the trick too
+# It's better for as as it can be done before installing gitolite, hence
+# creating the user.
+# I still not understand why it's needed (just work without comment or tricks
+# on a fresh centos install)
 RUN sed -i '/session    required     pam_loginuid.so/c\#session    required     pam_loginuid.so' /etc/pam.d/sshd
 
 RUN /sbin/service sshd start && yum install -y --enablerepo=rpmforge-extras tuleap-plugin-git
