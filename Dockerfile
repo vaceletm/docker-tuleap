@@ -12,28 +12,13 @@ MAINTAINER Manuel Vacelet, manuel.vacelet@enalean.com
 
 ## Install dependencies ##
 RUN yum install -y wget
-RUN wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
-RUN rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt
-RUN rpm -i rpmforge-release-0.5.3-1.el6.rf.*.rpm
-ADD rpmforge.repo /etc/yum.repos.d/
-
-RUN rpm -i http://mir01.syntis.net/epel/6/i386/epel-release-6-8.noarch.rpm
 
 ## Tweak configuration ##
 RUN echo "SELINUX=disabled" > /etc/selinux/config
 
-## Deploy Tuleap ##
-RUN yum install -y which redhat-lsb-core mysql-server openssh-server
-
-ADD Tuleap.repo /etc/yum.repos.d/
-RUN yum install -y tuleap
-RUN yum install -y tuleap-plugin-tracker
-RUN yum install -y tuleap-theme-experimental
-RUN yum install -y tuleap-theme-tuleap	
-RUN yum install -y tuleap-core-subversion
-
 # Fix centos defaults
 # Cron: http://stackoverflow.com/a/21928878/1528413
+RUN yum install -y cronie; yum clean all
 RUN sed -i '/session    required   pam_loginuid.so/c\#session    required   pam_loginuid.so' /etc/pam.d/crond
 
 # Gitolite will not work out-of-the-box with an error like 
@@ -44,18 +29,25 @@ RUN sed -i '/session    required   pam_loginuid.so/c\#session    required   pam_
 # creating the user.
 # I still not understand why it's needed (just work without comment or tricks
 # on a fresh centos install)
+RUN yum install -y openssh-server; yum clean all
 RUN sed -i '/session    required     pam_loginuid.so/c\#session    required     pam_loginuid.so' /etc/pam.d/sshd
-
-RUN /sbin/service sshd start && yum install -y --enablerepo=rpmforge-extras tuleap-plugin-git
 
 RUN echo "NETWORKING=yes" > /etc/sysconfig/network
 
-# Install Tuleap
-RUN bash /usr/share/tuleap/tools/setup.sh --sys-default-domain=localhost --sys-org-name=Tuleap --sys-long-org-name=Tuleap
+ADD vagrant-tuleap /root/vagrant-tuleap
 
-RUN yum -y install supervisor
+# Install Chef
+RUN yum install curl; yum clean all
+RUN curl -L https://www.opscode.com/chef/install.sh | bash
+
+RUN /sbin/service sshd start && chef-solo -c /root/vagrant-tuleap/solo/solo.rb -j /root/vagrant-tuleap/solo/rpm.json
+
+# install supervisord
+RUN yum install -y python-pip && pip install pip --upgrade
+RUN pip install supervisor
+
 ADD supervisord.conf /etc/supervisord.conf
 
-CMD ["/usr/bin/supervisord"]
-
 EXPOSE 22 80 443
+
+CMD ["supervisord", "-n"]
